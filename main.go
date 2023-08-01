@@ -26,7 +26,7 @@ func main() {
 		}
 	}(driver, ctx)
 
-	pools := make([]*Contract, 0, NumberOfPools)
+	pools := make([]*Pool, 0, NumberOfPools)
 	// Generate NumberOfPools pools
 	for i := 0; i < NumberOfPools; i++ {
 		// create a new pool
@@ -39,7 +39,7 @@ func main() {
 		pools = append(pools, pool)
 	}
 
-	dependencies := make([]*Contract, 0, NumberOfDependencies)
+	dependencies := make([]*Dependency, 0, NumberOfDependencies)
 	// Generate NumberOfDependencies dependencies
 	for i := 0; i < NumberOfDependencies; i++ {
 		// create a new dependency
@@ -53,12 +53,6 @@ func main() {
 	}
 
 	for _, p := range pools {
-		// create a relationship between the pool and itself
-		//err = createRelationship(ctx, driver, p.ID, p.ID)
-		//if err != nil {
-		//	log.Fatalf("Failed to create relationship from the pool to itself: %v", err)
-		//}
-
 		// choose a random dependency
 		dependency := pickRandomDependency(dependencies)
 

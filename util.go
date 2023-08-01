@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func pickRandomDependency(dependencies []*Contract) *Contract {
+func pickRandomDependency(dependencies []*Dependency) *Dependency {
 	rand.Seed(time.Now().UnixNano())
 
 	randomIndex := rand.Intn(len(dependencies))

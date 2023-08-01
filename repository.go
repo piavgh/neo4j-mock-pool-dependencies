@@ -8,13 +8,13 @@ import (
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
 
-func createPool(ctx context.Context, driver neo4j.DriverWithContext, address string, poolType string) (*Contract, error) {
+func createPool(ctx context.Context, driver neo4j.DriverWithContext, address string, poolType string) (*Pool, error) {
 	session := driver.NewSession(ctx, neo4j.SessionConfig{})
 	defer session.Close(ctx)
 
 	result, err := session.Run(
 		ctx,
-		"MERGE (p:Contract {address: $address, type: $type}) RETURN id(p)",
+		"MERGE (p:Pool {address: $address, type: $type}) RETURN id(p)",
 		map[string]interface{}{"address": address, "type": poolType},
 	)
 	if err != nil {
@@ -31,16 +31,16 @@ func createPool(ctx context.Context, driver neo4j.DriverWithContext, address str
 		return nil, fmt.Errorf("invalid ID type")
 	}
 
-	return &Contract{ID: id, Address: address}, nil
+	return &Pool{ID: id, Address: address}, nil
 }
 
-func createDependency(ctx context.Context, driver neo4j.DriverWithContext, address string) (*Contract, error) {
+func createDependency(ctx context.Context, driver neo4j.DriverWithContext, address string) (*Dependency, error) {
 	session := driver.NewSession(ctx, neo4j.SessionConfig{})
 	defer session.Close(ctx)
 
 	result, err := session.Run(
 		ctx,
-		"MERGE (d:Contract {address: $address}) RETURN id(d)",
+		"MERGE (d:Dependency {address: $address}) RETURN id(d)",
 		map[string]interface{}{"address": address},
 	)
 	if err != nil {
@@ -57,7 +57,7 @@ func createDependency(ctx context.Context, driver neo4j.DriverWithContext, addre
 		return nil, fmt.Errorf("invalid ID type")
 	}
 
-	return &Contract{ID: id, Address: address}, nil
+	return &Dependency{ID: id, Address: address}, nil
 }
 
 func createRelationship(ctx context.Context, driver neo4j.DriverWithContext, sourceId int64, targetId int64) error {
@@ -66,7 +66,7 @@ func createRelationship(ctx context.Context, driver neo4j.DriverWithContext, sou
 
 	result, err := session.Run(
 		ctx,
-		"MATCH\n  (a:Contract),\n  (b:Contract)\nWHERE id(a) = $sourceId AND id(b) = $targetId\nMERGE (a)-[r:DEPEND_ON {name: a.address + '->' + b.address}]->(b)\nRETURN type(r), r.name",
+		"MATCH\n  (a:Pool),\n  (b:Dependency)\nWHERE id(a) = $sourceId AND id(b) = $targetId\nMERGE (a)-[r:DEPEND_ON {name: a.address + '->' + b.address}]->(b)\nRETURN type(r), r.name",
 		map[string]interface{}{"sourceId": sourceId, "targetId": targetId},
 	)
 	if err != nil {
@@ -94,13 +94,13 @@ func createRelationship(ctx context.Context, driver neo4j.DriverWithContext, sou
 	return nil
 }
 
-func getPoolByAddress(ctx context.Context, driver neo4j.DriverWithContext, address string) (*Contract, error) {
+func getPoolByAddress(ctx context.Context, driver neo4j.DriverWithContext, address string) (*Pool, error) {
 	session := driver.NewSession(ctx, neo4j.SessionConfig{})
 	defer session.Close(ctx)
 
 	result, err := session.Run(
 		ctx,
-		"MATCH (p:Contract) WHERE p.address = $address RETURN id(p) LIMIT 1",
+		"MATCH (p:Pool) WHERE p.address = $address RETURN id(p) LIMIT 1",
 		map[string]interface{}{"address": address},
 	)
 	if err != nil {
@@ -117,16 +117,16 @@ func getPoolByAddress(ctx context.Context, driver neo4j.DriverWithContext, addre
 		return nil, fmt.Errorf("invalid ID type")
 	}
 
-	return &Contract{ID: id, Address: address}, nil
+	return &Pool{ID: id, Address: address}, nil
 }
 
-func getPoolByID(ctx context.Context, driver neo4j.DriverWithContext, id int64) (*Contract, error) {
+func getPoolByID(ctx context.Context, driver neo4j.DriverWithContext, id int64) (*Pool, error) {
 	session := driver.NewSession(ctx, neo4j.SessionConfig{})
 	defer session.Close(ctx)
 
 	result, err := session.Run(
 		ctx,
-		"MATCH (p:Contract) WHERE id(p) = $id RETURN p.address",
+		"MATCH (p:Pool) WHERE id(p) = $id RETURN p.address",
 		map[string]interface{}{"id": id},
 	)
 	if err != nil {
@@ -143,16 +143,16 @@ func getPoolByID(ctx context.Context, driver neo4j.DriverWithContext, id int64) 
 		return nil, fmt.Errorf("invalid address type")
 	}
 
-	return &Contract{ID: id, Address: address}, nil
+	return &Pool{ID: id, Address: address}, nil
 }
 
-func updatePoolType(ctx context.Context, driver neo4j.DriverWithContext, id int64, poolType int) (*Contract, error) {
+func updatePoolType(ctx context.Context, driver neo4j.DriverWithContext, id int64, poolType int) (*Pool, error) {
 	session := driver.NewSession(ctx, neo4j.SessionConfig{})
 	defer session.Close(ctx)
 
 	result, err := session.Run(
 		ctx,
-		"MATCH (p:Contract) WHERE id(p) = $id SET p.type = $type RETURN p.address, p.type",
+		"MATCH (p:Pool) WHERE id(p) = $id SET p.type = $type RETURN p.address, p.type",
 		map[string]interface{}{"id": id, "type": poolType},
 	)
 	if err != nil {
@@ -174,7 +174,7 @@ func updatePoolType(ctx context.Context, driver neo4j.DriverWithContext, id int6
 		return nil, fmt.Errorf("invalid poolType type")
 	}
 
-	return &Contract{ID: id, Address: address, Type: strconv.FormatInt(newType, 10)}, nil
+	return &Pool{ID: id, Address: address, Type: strconv.FormatInt(newType, 10)}, nil
 }
 
 func deletePool(ctx context.Context, driver neo4j.DriverWithContext, id int64) error {
@@ -183,7 +183,7 @@ func deletePool(ctx context.Context, driver neo4j.DriverWithContext, id int64) e
 
 	_, err := session.Run(
 		ctx,
-		"MATCH (p:Contract) WHERE id(p) = $id DELETE p",
+		"MATCH (p:Pool) WHERE id(p) = $id DELETE p",
 		map[string]interface{}{"id": id},
 	)
 	if err != nil {
