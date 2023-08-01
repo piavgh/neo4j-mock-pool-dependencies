@@ -54,10 +54,10 @@ func main() {
 
 	for _, p := range pools {
 		// create a relationship between the pool and itself
-		err = createRelationship(ctx, driver, p.ID, p.ID)
-		if err != nil {
-			log.Fatalf("Failed to create relationship from the pool to itself: %v", err)
-		}
+		//err = createRelationship(ctx, driver, p.ID, p.ID)
+		//if err != nil {
+		//	log.Fatalf("Failed to create relationship from the pool to itself: %v", err)
+		//}
 
 		// choose a random dependency
 		dependency := pickRandomDependency(dependencies)

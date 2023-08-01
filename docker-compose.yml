@@ -3,7 +3,7 @@ version: "3.1"
 services:
   neo4j:
     image: "neo4j:latest"
-    container_name: go-neo4j-crud
+    container_name: neo4j-mock-pool-dependencies
     ports:
       - "7474:7474"
       - "7687:7687"
